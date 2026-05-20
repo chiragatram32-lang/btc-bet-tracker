@@ -1,7 +1,8 @@
 export function calculateProbabilities(ptb, current) {
-  const diff = current - ptb;
+  const pctChange = ((current - ptb) / ptb) * 100;
 
-  let up = 50 + diff * 5;
+  // 1% move = 20% probability swing (tunable)
+  let up = 50 + pctChange * 20;
   let down = 100 - up;
 
   up = Math.max(0, Math.min(100, up));
