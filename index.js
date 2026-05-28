@@ -1,52 +1,65 @@
+import {
+  startPriceStream,
+  getLivePrice,
+  getMarketData
+} from "./api.js";
 
-
-// Import modules
-import { startPriceStream } from "./api.js";
-import { render } from "./display.js";
-import { calculateProbabilities } from "./utils.js";
-
-// PTB (Price to Beat) — initialized later
-let ptb = null;
-
-// Track when current 5-minute window started
-let startTime = Date.now();
-
-// Window duration in seconds (5 minutes)
-const WINDOW = 300;
+import { render }
+  from "./display.js";
 
 /**
- * Start receiving live price updates
+ * Start Binance stream
  */
-startPriceStream(({ price }) => {
+startPriceStream();
 
-  // Initialize PTB at first received price
-  if (!ptb) {
-    ptb = price;
-    startTime = Date.now();
-  }
+/**
+ * Wait for websocket
+ */
+setTimeout(() => {
 
-  // Calculate how much time has passed
-  const elapsed = Math.floor((Date.now() - startTime) / 1000);
+  setInterval(async () => {
 
-  // Remaining time in current window
-  let remaining = WINDOW - elapsed;
+    const market =
+      await getMarketData();
 
-  // If 5 minutes passed → reset window
-  if (remaining <= 0) {
-    ptb = price;           // new PTB
-    startTime = Date.now();// reset timer
-    remaining = WINDOW;    // reset countdown
-  }
+    const livePrice =
+      getLivePrice();
 
-  // Calculate Up/Down probabilities
-  const { up, down } = calculateProbabilities(ptb, price);
+    if (
+      !market ||
+      !livePrice
+    ) {
 
-  // Render updated data in terminal
-  render({
-    ptb,
-    price,
-    up,
-    down,
-    remaining,
-  });
-});
+      console.log(
+        "Waiting for data..."
+      );
+
+      return;
+    }
+
+    /**
+     * Remaining seconds
+     */
+    const remaining =
+      Math.max(
+        0,
+        Math.floor(
+          (
+            new Date(
+              market.endTime
+            ) - Date.now()
+          ) / 1000
+        )
+      );
+
+    render({
+      ptb: market.ptb,
+      price: livePrice,
+      up: market.up,
+      down: market.down,
+      remaining
+    });
+
+  }, 1000);
+
+}, 5000);

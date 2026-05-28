@@ -24,3 +24,8 @@ node index.js
 ## Notes
 - Uses real-time trade data from Binance
 - Up/Down values are derived based on price movement within the time window
+
+## Fixes
+- Implemented the intended 5-minute rolling PTB window
+- Added live probability calculations using current price movement
+- Updated terminal rendering for clean in-place output

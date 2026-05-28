@@ -1,54 +1,83 @@
-// display.js
-
 /**
- * Formats number as USD currency
+ * Format USD values
  */
 function formatUSD(value) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-  }).format(value);
+  if (
+    value === null ||
+    value === undefined ||
+    isNaN(value)
+  ) {
+    return "N/A";
+  }
+
+  return `$${Number(value).toFixed(2)}`;
 }
 
 /**
- * Converts seconds into "Xm Ys" format
+ * Format remaining time
  */
 function formatTime(seconds) {
+  if (
+    seconds === null ||
+    seconds === undefined ||
+    isNaN(seconds)
+  ) {
+    return "N/A";
+  }
+
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
+
   return `${mins}m ${secs}s`;
 }
 
 /**
- * Renders the terminal UI
+ * Render terminal output
  */
-export function render({ ptb, price, up, down, remaining }) {
-  // Clear terminal screen before re-rendering (in-place update)
+export function render({
+  ptb,
+  price,
+  up,
+  down,
+  remaining
+}) {
+
+  /**
+   * Clear terminal
+   */
   process.stdout.write("\x1Bc");
 
-  // Helper to align columns with fixed width
-  const format = (val, width = 16) =>
-    String(val).padEnd(width, " ");
-
-  // Header row
   console.log(
-    format("PTB") +
-      format("LIVE") +
-      format("UP") +
-      format("DOWN") +
-      format("EXPIRES")
+    "Polymarket BTC Market\n"
   );
 
-  // Divider
-  console.log("-".repeat(80));
-
-  // Data row
   console.log(
-    format(formatUSD(ptb)) +     // Price to Beat with $
-      format(formatUSD(price)) + // Live price with $
-      format(`${up}%`) +         // Up probability
-      format(`${down}%`) +       // Down probability
-      format(formatTime(remaining)) // Time left
+    `PTB: ${formatUSD(ptb)}`
+  );
+
+  console.log(
+    `Live Price: ${formatUSD(price)}`
+  );
+
+  console.log(
+    `Up: ${
+      up !== undefined
+        ? up
+        : "N/A"
+    }`
+  );
+
+  console.log(
+    `Down: ${
+      down !== undefined
+        ? down
+        : "N/A"
+    }`
+  );
+
+  console.log(
+    `Expires In: ${formatTime(
+      remaining
+    )}`
   );
 }
